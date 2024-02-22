@@ -17,5 +17,7 @@ typedef struct dynVertex{
 int getdynVertexSize(dynVertex*);
 int getdynVertexTotal(dynVertex*);
 void expanddynVertex(dynVertex*);
+void insertdynVertex(dynVertex *dynVertex, unsigned int index,
+                    Vertex insertData);
 
 #endif

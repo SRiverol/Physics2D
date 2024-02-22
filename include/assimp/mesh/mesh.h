@@ -2,17 +2,14 @@
 #include "../IndexType/dynIndex.h"
 #include "../TextureType/dynTexture.h"
 #include "../VertexType/dynVertex.h"
+#include "../MeshType/dynMesh.h"
+#include "../model/model.h"
 
 #ifndef MESH_H
 #define MESH_H
 
-typedef struct {
-        dynVertex verticies;
-        dynTexture textures;
-        dynIndex indicies;
-} Mesh;
-
 Mesh buildMesh(dynVertex someVertex, dynIndex indicies, dynTexture someTexture);
-void setupMesh(Mesh* mesh, unsigned int VAO);
+void setupMesh(Mesh* mesh);
+void drawModel(Mesh *mesh, Model* model);
 
 #endif

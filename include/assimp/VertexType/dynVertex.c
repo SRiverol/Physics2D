@@ -1,5 +1,4 @@
 #include "dynVertex.h"
-#include "stdlib.h"
 #include <stdio.h>
 
 dynVertex initdynVertex() {

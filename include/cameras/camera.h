@@ -6,7 +6,7 @@
 #include <glad/glad.h>
 #include <stdio.h>
 
-enum cameraMovement { FORWARD, BACKWARD, LEFT, RIGHT };
+enum cameraMovement { FORWARD, BACKWARD, LEFT, RIGHT, UP, DOWN };
 
 typedef struct {
   // camera Attributes
@@ -14,6 +14,7 @@ typedef struct {
   vec3 Front;
   vec3 Up;
   vec3 Right;
+  vec3 Left;
   vec3 WorldUp;
   // euler Angles
   float Yaw;

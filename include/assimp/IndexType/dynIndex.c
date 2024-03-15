@@ -19,7 +19,7 @@ void addDynIndex(dynIndex *dynIndex, unsigned int newData) {
       realloc(dynIndex->items, sizeof(unsigned int) * dynIndex->total);
 
   if (dynIndex->items == NULL) {
-    printf("memory is bad\n");
+    printf("memory is bad: INDEX\n");
     exit(1);
   }
 
@@ -34,7 +34,7 @@ void insertDynIndex(dynIndex *dynIndex, unsigned int index,
       realloc(dynIndex->items, sizeof(unsigned int) * dynIndex->total);
 
   if (dynIndex->items == NULL) {
-    printf("memory is bad but inserting\n");
+    printf("memory is bad but inserting: INDEX\n");
     exit(1);
   }
 

@@ -1,8 +1,8 @@
-
 #define STB_IMAGE_IMPLEMENTATION
 
+#include "../include/assimp/model/model.h"
 #include "../include/cameras/camera.h"
-#include "../include/shaders/shader.h"
+#include "../include/physics/physicsObject.h"
 #include "../include/stb_image.h"
 #include <cglm/affine.h>
 #include <cglm/cam.h>
@@ -25,17 +25,19 @@ unsigned int loadTexture(char *path);
 const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 
+dynTexture loaded_textures;
+PhysicsObject mainCube;
 // camera
 Camera mainCamera;
 // Default Main Cam Values
-vec3 pos = {0.0f, 0.0f, 3.0f};
+vec3 pos = {0.0f, 0.0f, 0.0f};
 vec3 worldup = {0.0f, 1.0f, 0.0f};
 vec3 front = {0.0f, 0.0f, -1.0f};
 vec3 up = {0.0f, 1.0f, 0.0f};
 // default camera values
 float yaw = -90.0f;
 float pitch = 0.0f;
-float movementSpeed = 2.5f;
+float movementSpeed = 10.0f;
 float mouseSensitivity = 0.1f;
 float Zoom = 45.0f;
 
@@ -48,13 +50,11 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 // lighting
-
 vec3 lightPos = {1.2f, 1.0f, 2.0f};
 vec3 lightColor = {1.0f, 1.0f, 1.0f};
 vec3 toyColor = {1.0f, 0.5f, 0.31f};
 
 int main() {
-
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -65,7 +65,7 @@ int main() {
   GLFWwindow *window =
       glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Cubes are cool", NULL, NULL);
   if (window == NULL) {
-    printf("WINDOW FAIL");
+    printf("WINDOW FAIL \n");
     glfwTerminate();
     return -1;
   }
@@ -77,7 +77,7 @@ int main() {
   // glad: load all OpenGL function pointers
   // ---------------------------------------
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-    printf("GLAD FAIL");
+    printf("GLAD FAIL \n");
 
     return -1;
   }
@@ -87,15 +87,26 @@ int main() {
   // Camera Setup
   editCamera(pos, worldup, front, up, yaw, pitch, movementSpeed,
              mouseSensitivity, Zoom, &mainCamera);
+  Model fancyModel;
 
   // Shader definitions
   Shader lightShader =
       buildShaders("/home/srl/Programming/Physics2D/src/colors/colors.vs",
                    "/home/srl/Programming/Physics2D/src/colors/colors.fs");
 
+  Shader basic =
+      buildShaders("/home/srl/Programming/Physics2D/src/basicShader/basic.vs",
+                   "/home/srl/Programming/Physics2D/src/basicShader/basic.fs");
+
   Shader lightCubeSourceShader = buildShaders(
       "/home/srl/Programming/Physics2D/src/lightCubeSource/lightCube.vs",
       "/home/srl/Programming/Physics2D/src/lightCubeSource/lightCube.fs");
+
+  setupModel(
+      &fancyModel,
+      "/home/srl/Programming/Physics2D/assets/models/testCube/untitled.obj",
+      "Yo", lightShader);
+  printf("Loading Model Complete \n");
 
   float vertices[] = {
       // positions          // normals           // texture coords
@@ -175,13 +186,20 @@ int main() {
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
 
-  unsigned int diffuseMap = loadTexture("/home/srl/Pictures/diam.png");
-  unsigned int specularMap = loadTexture("/home/srl/Pictures/diam_spec.png");
+  unsigned int diffuseMap = loadTexture(
+      "/home/srl/Programming/lunarpenguin/Resources/LunarPenguin.png");
+  unsigned int specularMap =
+      loadTexture("/home/srl/Pictures/LunarPenguin_Spec.png");
+  unsigned int diffuseMapD = loadTexture("/home/srl/Pictures/dirt.png");
+
   // shader configuration
   // --------------------
   useShader(lightShader);
   shaderSetInt(lightShader, "material.diffuse", 0);
   shaderSetInt(lightShader, "material.specular", 1);
+
+  // CUBE INFO
+  initialAtRestPhysics(&mainCube, (vec3){0.0f, 24.0f, 0.0f}, 1);
 
   // render loop
   // -----------
@@ -195,6 +213,7 @@ int main() {
     // input
     // -----------------
     processInput(window);
+    physicsRuntime(&mainCube, deltaTime);
 
     // render
     // -----------------
@@ -203,9 +222,14 @@ int main() {
 
     useShader(lightShader);
 
-    glm_vec3_copy((vec3){(float)sin(glfwGetTime()) * 2,
-                         (float)cos(glfwGetTime()) * 2, 0.0f},
-                  lightPos);
+    glm_vec3_copy(
+        (vec3){
+            (float)sin(glfwGetTime() / 1) * 6,
+            (float)cos(glfwGetTime() / 1) * 6,
+            (float)cos(glfwGetTime() / 3) * 6,
+        },
+        lightPos);
+    // COLORFUL LIGHTS
     glm_vec3_copy((vec3){(float)(sin(glfwGetTime() * 1)),
                          (float)(cos(glfwGetTime() / 2)),
                          (float)(cos(glfwGetTime() / 4))},
@@ -220,9 +244,9 @@ int main() {
 
     shaderSetVec3(lightShader, "lightColor", lightColor);
     shaderSetVec3(lightShader, "globallight.ambient", (vec3){0.2f, 0.2f, 0.2f});
-    shaderSetVec3(lightShader, "globallight.diffuse", (vec3){0.5f, 0.5f, 0.5f});
+    shaderSetVec3(lightShader, "globallight.diffuse", (vec3){0.0f, 0.0f, 0.0f});
     shaderSetVec3(lightShader, "globallight.specular",
-                  (vec3){1.0f, 1.0f, 1.0f});
+                  (vec3){0.0f, 0.0f, 0.0f});
     shaderSetVec3(lightShader, "pointLights[0].ambient", ambientLight);
     shaderSetVec3(lightShader, "pointLights[0].diffuse", lightColor);
     shaderSetVec3(lightShader, "pointLights[0].specular", lightColor);
@@ -236,7 +260,7 @@ int main() {
 
     // GLOBAL LIGHT
     shaderSetVec3(lightShader, "globallight.direction",
-                  (vec3){0.0f, -1.0f, -0.0f});
+                  (vec3){0.0f, -1.0f, -0.5f});
 
     // Camera land
     // -----------------
@@ -253,29 +277,28 @@ int main() {
     // World Transformation
     mat4 model;
     glm_mat4_identity(model);
+
+    glm_scale(model, (vec3){10.1f, 0.1f, 10.1f});
+    glm_translate(model, (vec3){0.0f, -7.5f, 0.0f});
+
     shaderSetMat4(lightShader, "fragModel", model);
     // glm_rotate(model, glfwGetTime(), (vec3){5.0f, 5.0f, 0.0f});
     shaderSetMat4(lightShader, "model", model);
     shaderSetVec3(lightShader, "viewPos", mainCamera.Pos);
 
-    // the exalted color cube of 0,0,0
+    // the exalted colored by light cube of 0,0,0
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, diffuseMap);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, specularMap);
-
     glBindVertexArray(cubeVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    // Lots of common color cubes of whatever
-    for (unsigned int i = 0; i < 10; i++) {
-      glm_mat4_identity(model);
-      glm_translate(model, cubePositions[i]);
-      float angle = 20.0f * i;
-      glm_rotate(model, glm_rad(angle), (vec3){1.0f, 0.3f, 0.5f});
-      shaderSetMat4(lightShader, "model", model);
-      glDrawArrays(GL_TRIANGLES, 0, 36);
-    }
+    glm_mat4_identity(model);
+
+    glm_translate(model, mainCube.position);
+    shaderSetMat4(lightShader, "model", model);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
     // lame cube light source or whatever
     // Lame light stuff
     vec3 norm;
@@ -287,9 +310,11 @@ int main() {
     shaderSetVec3(lightCubeSourceShader, "color", lightColor);
     glm_mat4_identity(model);
     glm_translate(model, lightPos);
-    glm_scale(model, (vec3){0.2f, 0.2f, 0.2f});
+    glm_scale(model, (vec3){0.1f, 0.1f, 0.1f});
     shaderSetMat4(lightCubeSourceShader, "model", model);
 
+    draw(&fancyModel, &lightShader);
+    shaderSetInt(lightShader, "material.diffuse", 2);
     glBindVertexArray(lightCubeSourceVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -320,6 +345,16 @@ void processInput(GLFWwindow *window) {
     processKeyboard(&mainCamera, LEFT, deltaTime);
   if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     processKeyboard(&mainCamera, RIGHT, deltaTime);
+  if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+    processKeyboard(&mainCamera, UP, deltaTime);
+  if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+    processKeyboard(&mainCamera, DOWN, deltaTime);
+  if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+    initialAtRestPhysics(&mainCube, (vec3){0.0f, 24.0f, 0.0f}, 300);
+  if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback
@@ -350,7 +385,6 @@ void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
   lastY = ypos;
 
   processMouseMovement(&mainCamera, xoffset, yoffset, true);
-  printf("Pirch: %f, Yaw: %f \n", mainCamera.Pitch, mainCamera.Yaw);
 }
 
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
@@ -385,7 +419,7 @@ unsigned int loadTexture(char *path) {
 
     stbi_image_free(data);
   } else {
-    printf("Texture failed to load at path: ");
+    printf("Texture failed to load at path: \n");
     stbi_image_free(data);
   }
 

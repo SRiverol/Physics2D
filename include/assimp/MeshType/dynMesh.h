@@ -16,8 +16,11 @@ typedef struct dynMesh {
   Mesh *items;
 } dynMesh;
 
+
+dynMesh initdynMesh();
 int getdynMeshSize(dynMesh *);
 int getdynMeshTotal(dynMesh *);
 void insertdynMesh(dynMesh *dynMesh, unsigned int index, Mesh insertData);
+void adddynMesh(dynMesh *dynMesh, Mesh newData);
 
 #endif

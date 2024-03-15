@@ -5,6 +5,7 @@
 #include <cglm/vec3.h>
 
 #include <math.h>
+#include <stdio.h>
 // Defines several possible options for camera movement-> Used as abstraction to
 // stay away from window-system specific input methods
 
@@ -49,36 +50,67 @@ void processKeyboard(Camera *camera, enum cameraMovement direction,
 
   vec3 temp = {0.0f, 0.0f, 0.0f};
 
-  float cameraSpeed = camera->movementSpeed * deltaTime;
-  if (direction == FORWARD) {
-    glm_vec3_muladds(camera->Front, cameraSpeed, camera->Pos);
 
-    printf("FRONT X: %f, Y: %f, Z: %f \n", camera->Pos[0], camera->Pos[1],
-           camera->Pos[2]);
+  float cameraSpeed = camera->movementSpeed * deltaTime;
+
+  if (direction == FORWARD) {
+    // printf("camera->Front: %f\n", *camera->Front);
+
+    glm_vec3_crossn(camera->Right, (vec3) {0.0f, -1.0f, 0.0f}, temp);
+    glm_vec3_muladds(temp, cameraSpeed, camera->Pos);
+
+    
+    // printf("FRONT X: %f, Y: %f, Z: %f \n", camera->Pos[0], camera->Pos[1],
+           // camera->Pos[2]);
   }
   if (direction == BACKWARD) {
-    glm_vec3_scale(camera->Front, cameraSpeed, temp);
+    glm_vec3_crossn(camera->Right, (vec3) {0.0f, -1.0f, 0.0f}, temp);
+    glm_vec3_scale(temp, cameraSpeed, temp);
     glm_vec3_sub(camera->Pos, temp, camera->Pos);
 
-    printf("BACKWARD X: %f, Y: %f, Z: %f \n", camera->Pos[0], camera->Pos[1],
-           camera->Pos[2]);
+    // printf("BACKWARD X: %f, Y: %f, Z: %f \n", camera->Pos[0], camera->Pos[1],
+           // camera->Pos[2]);
   }
   if (direction == LEFT) {
     glm_vec3_crossn(camera->Front, camera->Up, temp);
-glm_vec3_scale(temp, cameraSpeed, temp);
-    glm_vec3_sub(camera->Pos, temp, camera->Pos);
+    glm_vec3_scale(temp, cameraSpeed, camera->Left);
+    glm_vec3_sub(camera->Pos, camera->Left, camera->Pos);
 
-    printf("LEFT X: %f, Y: %f, Z: %f \n", camera->Pos[0], camera->Pos[1],
-           camera->Pos[2]);
+    // printf("LEFT X: %f, Y: %f, Z: %f \n", camera->Pos[0], camera->Pos[1],
+           // camera->Pos[2]);
   }
   if (direction == RIGHT) {
     glm_vec3_crossn(camera->Front, camera->Up, temp);
     glm_vec3_scale(temp, cameraSpeed, temp);
     glm_vec3_add(camera->Pos, temp, camera->Pos);
 
-    printf("RIGHT X: %f, Y: %f, Z: %f \n", camera->Pos[0], camera->Pos[1],
-           camera->Pos[2]);
+    // printf("RIGHT X: %f, Y: %f, Z: %f \n", camera->Pos[0], camera->Pos[1],
+           // camera->Pos[2]);
   }
+  if (direction == UP) {
+
+    glm_vec3_crossn( (vec3) {0.0f, 0.0f, -1.0f}, (vec3) {-1.0f, 0.0f, 0.0f}, temp);
+    glm_vec3_scale(temp, cameraSpeed, temp);
+    glm_vec3_add(camera->Pos, temp, camera->Pos);
+
+    // printf("RIGHT X: %f, Y: %f, Z: %f \n", camera->Pos[0], camera->Pos[1],
+           // camera->Pos[2]);
+  }
+  if (direction == DOWN) {
+
+
+    glm_vec3_crossn( (vec3) {0.0f, 0.0f, 1.0f}, (vec3) {1.0f, 0.0f, 0.0f}, temp);
+    glm_vec3_scale(temp, cameraSpeed *-1, temp);
+    glm_vec3_add(camera->Pos, temp, camera->Pos);
+
+    // printf("RIGHT X: %f, Y: %f, Z: %f \n", camera->Pos[0], camera->Pos[1],
+    //        camera->Pos[2]);
+  }
+
+        if(camera->Pos[1] <= 0) {
+                camera->Pos[1] = 0;
+        }
+
 }
 // processes input received from a mouse scroll-wheel event-> Only requires
 // input on the vertical wheel-axis

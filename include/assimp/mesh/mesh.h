@@ -8,8 +8,8 @@
 #ifndef MESH_H
 #define MESH_H
 
-Mesh buildMesh(dynVertex someVertex, dynIndex indicies, dynTexture someTexture);
+Mesh buildMesh(dynVertex someVertex, dynIndex indicies, dynTexture textures);
 void setupMesh(Mesh* mesh);
-void drawModel(Mesh *mesh, Model* model);
+void drawModel(Mesh *mesh, Shader *shader);
 
 #endif

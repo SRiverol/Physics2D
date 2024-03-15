@@ -46,9 +46,9 @@ void main()
 // properties
     vec3 norm = normalize(Normal);
     vec3 viewDir = normalize(viewPos - FragPos);
-
+    vec3 result;
     // phase 1: Directional lighting
-    vec3 result = calcGlobalLight(globallight, norm, viewDir);
+    result = calcGlobalLight(globallight, norm, viewDir);
     // phase 2: Point lights
     for(int i = 0; i < NO_OF_POINT_LIGHTS; i++)
         result += calcPointLight(pointLights[i], norm, FragPos, viewDir);    

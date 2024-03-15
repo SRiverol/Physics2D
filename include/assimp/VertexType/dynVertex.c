@@ -1,10 +1,11 @@
+
 #include "dynVertex.h"
 #include <stdio.h>
 
 dynVertex initdynVertex() {
   dynVertex hi;
   hi.total = 0;
-  hi.size = 0;
+  hi.size = sizeof(Vertex);
   hi.items = NULL;
   return hi;
 }
@@ -15,25 +16,25 @@ int getdynVertexTotal(dynVertex *dynVertex) { return dynVertex->total; }
 void adddynVertex(dynVertex *dynVertex, Vertex newData) {
   dynVertex->total++;
   dynVertex->items =
-      realloc(dynVertex->items, sizeof(Vertex) * dynVertex->total);
+      realloc(dynVertex->items, sizeof(Vertex) * (dynVertex->total + 1));
 
   if (dynVertex->items == NULL) {
-    printf("memory is bad\n");
+    printf("memory is bad: VERTEX\n");
     exit(1);
   }
 
   dynVertex->size = sizeof(Vertex) * dynVertex->total;
-  dynVertex->items[(dynVertex->total - 1)] = newData;
+  dynVertex->items[dynVertex->total - 1] = newData;
 }
 
 void insertdynVertex(dynVertex *dynVertex, unsigned int index,
-                    Vertex insertData) {
+                     Vertex insertData) {
   dynVertex->total++;
   dynVertex->items =
       realloc(dynVertex->items, sizeof(Vertex) * dynVertex->total);
 
   if (dynVertex->items == NULL) {
-    printf("memory is bad but inserting\n");
+    printf("memory is bad but inserting: VERTEX\n");
     exit(1);
   }
 

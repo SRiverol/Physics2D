@@ -5,21 +5,20 @@
 dynTexture initdynTexture() {
   dynTexture hi;
   hi.total = 0;
-  hi.size = 0;
+  hi.size = sizeof(Texture);
   hi.items = NULL;
   return hi;
 }
 int getdynTextureSize(dynTexture *dynTexture) { return dynTexture->size; }
-
 int getdynTextureTotal(dynTexture *dynTexture) { return dynTexture->total; }
 
 void adddynTexture(dynTexture *dynTexture, Texture newData) {
   dynTexture->total++;
-  dynTexture->items =
-      realloc(dynTexture->items, sizeof(Texture) * dynTexture->total);
+  dynTexture->items = realloc(dynTexture->items, sizeof(Texture) * (dynTexture->total +1));
+
 
   if (dynTexture->items == NULL) {
-    printf("memory is bad\n");
+    printf("memory is bad: TEXTURE\n");
     exit(1);
   }
 
@@ -34,7 +33,7 @@ void insertdynTexture(dynTexture *dynTexture, unsigned int index,
       realloc(dynTexture->items, sizeof(Texture) * dynTexture->total);
 
   if (dynTexture->items == NULL) {
-    printf("memory is bad but inserting\n");
+    printf("memory is bad but inserting: TEXTURE\n");
     exit(1);
   }
 

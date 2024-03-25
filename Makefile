@@ -3,8 +3,8 @@ CC = gcc
 CFLAGS = -Wall -Wextra -std=c11
 LDFLAGS = -lm -ldl -lglfw -g -lassimp
 
-all: cameras.o shaders.o physics.o dynTexture.o dynVertex.o dynIndex.o dynMesh.o mesh.o model.o physics.o
-	gcc src/graphics.c include/glad.c apps/physics.o apps/shader.o apps/camera.o apps/dynTexture.o apps/dynVertex.o apps/dynIndex.o apps/dynMesh.o apps/mesh.o apps/model.o -o apps/test $(LDFLAGS) $(CFLAGS)
+all: cameras.o shaders.o physics.o dynTexture.o dynVertex.o dynIndex.o dynMesh.o mesh.o model.o physics.o testCube.o
+	gcc src/graphics.c include/glad.c apps/physics.o apps/shader.o apps/camera.o apps/dynTexture.o apps/testCube.o apps/dynVertex.o apps/dynIndex.o apps/dynMesh.o apps/mesh.o apps/model.o -o apps/test $(LDFLAGS) $(CFLAGS)
 	./apps/test
 	
 	#apps/dynTexture.o apps/dynVertex.o apps/dynIndex.o apps/dynMesh.o apps/mesh.o apps/model.o 
@@ -26,3 +26,5 @@ model.o:
 	gcc -c include/assimp/model/model.c -o apps/model.o
 physics.o:
 	gcc -c include/physics/physicsObject.c -o apps/physics.o
+testCube.o:
+	gcc -c include/tests/testCube/testCube.c -o apps/testCube.o

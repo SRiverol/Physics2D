@@ -1,3 +1,6 @@
+#ifndef shader_H
+#define shader_H
+
 #include <glad/glad.h> // include glad to get all the required OpenGL headers
 
 #include <cglm/vec3.h>
@@ -21,3 +24,5 @@ void shaderSetInt(Shader shader, const char *name, int value);
 void shaderSetFloat(Shader shader, const char *name, float value);
 void shaderSetVec3(Shader shader, const char *name, const vec3 value);
 void shaderSetMat4(Shader shader, const char *name, const mat4 value);
+
+#endif // !shader_H

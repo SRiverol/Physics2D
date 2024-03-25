@@ -8,6 +8,7 @@ typedef struct {
   dynVertex verticies;
   dynTexture textures;
   dynIndex indicies;
+  unsigned int VAO;
 } Mesh;
 
 typedef struct dynMesh {

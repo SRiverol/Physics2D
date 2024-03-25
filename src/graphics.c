@@ -4,6 +4,7 @@
 #include "../include/cameras/camera.h"
 #include "../include/physics/physicsObject.h"
 #include "../include/stb_image.h"
+#include "../include/tests/testCube/testCube.h"
 #include <cglm/affine.h>
 #include <cglm/cam.h>
 #include <cglm/mat4.h>
@@ -19,6 +20,7 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
+void checkGLError(const char *function);
 unsigned int loadTexture(char *path);
 
 // settings
@@ -54,6 +56,7 @@ vec3 lightPos = {1.2f, 1.0f, 2.0f};
 vec3 lightColor = {1.0f, 1.0f, 1.0f};
 vec3 toyColor = {1.0f, 0.5f, 0.31f};
 
+unsigned int VAOT;
 int main() {
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -102,12 +105,15 @@ int main() {
       "/home/srl/Programming/Physics2D/src/lightCubeSource/lightCube.vs",
       "/home/srl/Programming/Physics2D/src/lightCubeSource/lightCube.fs");
 
+  Shader simplest = buildShaders(
+      "/home/srl/Programming/Physics2D/src/shaders/simple/simple.vs",
+      "/home/srl/Programming/Physics2D/src/shaders/simple/simple.fs");
+
   setupModel(
       &fancyModel,
-      "/home/srl/Programming/Physics2D/assets/models/testCube/untitled.obj",
+      "/home/srl/Programming/Physics2D/assets/models/Banner/flagWhiteWide.obj",
       "Yo", lightShader);
   printf("Loading Model Complete \n");
-
   float vertices[] = {
       // positions          // normals           // texture coords
       -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f,  0.0f,  0.5f,  -0.5f,
@@ -191,7 +197,7 @@ int main() {
   unsigned int specularMap =
       loadTexture("/home/srl/Pictures/LunarPenguin_Spec.png");
   unsigned int diffuseMapD = loadTexture("/home/srl/Pictures/dirt.png");
-
+  VAOT = setupCube();
   // shader configuration
   // --------------------
   useShader(lightShader);
@@ -230,10 +236,10 @@ int main() {
         },
         lightPos);
     // COLORFUL LIGHTS
-    glm_vec3_copy((vec3){(float)(sin(glfwGetTime() * 1)),
-                         (float)(cos(glfwGetTime() / 2)),
-                         (float)(cos(glfwGetTime() / 4))},
-                  lightColor);
+    // glm_vec3_copy((vec3){(float)(sin(glfwGetTime() * 1)),
+    //                      (float)(cos(glfwGetTime() / 2)),
+    //                      (float)(cos(glfwGetTime() / 4))},
+    //               lightColor);
     vec3 ambientLight;
     glm_vec3_mul(lightColor, (vec3){0.2f, 0.2f, 0.2f}, ambientLight);
     // MATERIAL PROPERTIES
@@ -304,25 +310,30 @@ int main() {
     vec3 norm;
     vec3 lightDirection;
 
-    useShader(lightCubeSourceShader);
-    shaderSetMat4(lightCubeSourceShader, "projection", projection);
-    shaderSetMat4(lightCubeSourceShader, "view", view);
-    shaderSetVec3(lightCubeSourceShader, "color", lightColor);
+    useShader(basic);
+    shaderSetMat4(basic, "projection", projection);
+    shaderSetMat4(basic, "view", view);
     glm_mat4_identity(model);
     glm_translate(model, lightPos);
-    glm_scale(model, (vec3){0.1f, 0.1f, 0.1f});
-    shaderSetMat4(lightCubeSourceShader, "model", model);
+    glm_scale(model, (vec3){0.2f, 0.2f, 0.2f});
 
-    draw(&fancyModel, &lightShader);
+    shaderSetMat4(basic, "model", model);
+
     shaderSetInt(lightShader, "material.diffuse", 2);
     glBindVertexArray(lightCubeSourceVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    useShader(lightShader);
+    shaderSetMat4(lightShader, "projection", projection);
+    shaderSetMat4(lightShader, "view", view);
+    glm_mat4_identity(model);
+    shaderSetMat4(lightShader, "model", model);
+    draw(&fancyModel, &lightShader);
 
     // Events
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
-
   // Terminate
   glDeleteVertexArrays(1, &cubeVAO);
   glDeleteVertexArrays(1, &lightCubeSourceVAO);
@@ -351,6 +362,7 @@ void processInput(GLFWwindow *window) {
     processKeyboard(&mainCamera, DOWN, deltaTime);
   if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
     initialAtRestPhysics(&mainCube, (vec3){0.0f, 24.0f, 0.0f}, 300);
+
   if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
@@ -424,4 +436,11 @@ unsigned int loadTexture(char *path) {
   }
 
   return textureID;
+}
+
+void checkGLError(const char *function) {
+  GLenum error;
+  while ((error = glGetError()) != GL_NO_ERROR) {
+    printf("OpenGL error in function %s: %d\n", function, error);
+  }
 }

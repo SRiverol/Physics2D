@@ -25,10 +25,8 @@ dynTexture loadMaterialTextures(const struct aiMaterial *mat,
 void setupModel(Model *model, char *filePath, char *directory,
                 Shader someModelShader) {
   model->meshes = initdynMesh();
-
   model->filePath = (char *)malloc(sizeof(char) * strlen(filePath));
   strcpy(model->filePath, filePath);
-
   model->modelShader = someModelShader;
   loadModel(model);
 }
@@ -83,7 +81,7 @@ Mesh processMesh(Model *model, const struct aiMesh *meshPtr,
     // GET POSITION COORDS PER MESH VEC3
     vec3 pos = {meshPtr->mVertices[i].x, meshPtr->mVertices[i].y,
                 meshPtr->mVertices[i].z};
-    glm_vec3_copy(pos, vertex.normal);
+    glm_vec3_copy(pos, vertex.position);
 
     // GET VERTEX NORMALS PER MESH VEC3
     vec3 normans = {meshPtr->mNormals[i].x, meshPtr->mNormals[i].y,

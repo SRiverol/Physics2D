@@ -84,8 +84,6 @@ Shader buildShaders(char *vertexPath, char *fragmentPath) {
   fclose(vShaderFile);
   fclose(fShaderFile);
 
-
-
   // Compile shader data into a shader program
   //--------------------------------------------------
   unsigned int vertex, fragment;
@@ -109,6 +107,11 @@ Shader buildShaders(char *vertexPath, char *fragmentPath) {
   glDeleteShader(vertex);
   glDeleteShader(fragment);
 
+  GLenum error = glGetError();
+  if (error != GL_NO_ERROR) {
+    // Log or handle the error
+    printf("Error: %i", error);
+  }
   return finalShader;
 }
 
@@ -134,5 +137,6 @@ void shaderSetVec3(Shader shader, const char *name, const vec3 value) {
 }
 
 void shaderSetMat4(Shader shader, const char *name, const mat4 value) {
-  glUniformMatrix4fv(glGetUniformLocation(shader.shaderID, name), 1, GL_FALSE, (float*) value);
+  glUniformMatrix4fv(glGetUniformLocation(shader.shaderID, name), 1, GL_FALSE,
+                     (float *)value);
 }
